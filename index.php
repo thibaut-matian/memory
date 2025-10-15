@@ -101,12 +101,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 try {
                     $game = unserialize($_SESSION['current_game']);
                     $cardId = (int)($_POST['card_id'] ?? -1);
-                    
+
                     if ($game && method_exists($game, 'flipCard')) {
                         $result = $game->flipCard($cardId);
                         if ($result) {
                             $_SESSION['current_game'] = serialize($game);
-                            
+
                             // Vérifier si le jeu est terminé
                             $stats = $game->getStats();
                             if ($stats['isCompleted']) {
@@ -118,6 +118,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                 // Déclencher un auto-reset après 1 seconde sans JS via redirection
                                 $_SESSION['pending_reset'] = true;
                             }
+
+                            // Mémoriser la dernière carte cliquée pour l'ancrage
+                            $_SESSION['last_card'] = $cardId;
+                            // Rediriger vers l'ancre de la carte pour rester sur la même position
+                            header('Location: index.php#card-' . $cardId);
+                            exit;
                         }
                     }
                 } catch (Exception $e) {
@@ -150,7 +156,8 @@ if (isset($_GET['do']) && $_GET['do'] === 'reset' && isset($_SESSION['current_ga
         $_SESSION['current_game'] = serialize($game);
         unset($_SESSION['pending_reset']);
     }
-    header('Location: index.php');
+    $anchor = isset($_SESSION['last_card']) ? '#card-' . (int)$_SESSION['last_card'] : '';
+    header('Location: index.php' . $anchor);
     exit;
 }
 
@@ -191,8 +198,10 @@ if (isset($_SESSION['current_game'])) {
     <title>Memory Game - Jeu de Mémoire</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <?php if (!empty($_SESSION['pending_reset'])): ?>
-        <meta http-equiv="refresh" content="1;url=index.php?do=reset">
+    <?php if (!empty($_SESSION['pending_reset'])):
+        $lastAnchor = isset($_SESSION['last_card']) ? '#card-' . (int)$_SESSION['last_card'] : '';
+    ?>
+        <meta http-equiv="refresh" content="1;url=index.php?do=reset<?= $lastAnchor ?>">
     <?php endif; ?>
 </head>
 <body>
@@ -307,7 +316,7 @@ if (isset($_SESSION['current_game'])) {
                 <div class="game-board grid-<?php echo ceil(sqrt(count($currentGame->getCards()))); ?>">
                     <?php foreach ($currentGame->getCards() as $card): ?>
                         <!-- Remplacé : wrapper unique pour chaque carte -->
-                        <div class="card-container <?php echo $card['isMatched'] ? 'matched' : ''; ?>">
+                        <div id="card-<?php echo $card['id']; ?>" class="card-container <?php echo $card['isMatched'] ? 'matched' : ''; ?>">
                             <?php if ($card['isMatched']): ?>
                                 <div class="card face front matched" style="background-color: <?= htmlspecialchars($card['color']) ?>;">
                                     <img src="<?= htmlspecialchars($card['image']) ?>" alt="" class="card-img">
