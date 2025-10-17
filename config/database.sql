@@ -1,12 +1,4 @@
--- Script de création de la base de données Memory Game
--- À exécuter dans phpMyAdmin ou ligne de commande MySQL
 
--- Créer la base de données
-CREATE DATABASE IF NOT EXISTS memory_game 
-CHARACTER SET utf8mb4 
-COLLATE utf8mb4_unicode_ci;
-
-USE memory_game;
 
 -- Table des joueurs
 CREATE TABLE players (
