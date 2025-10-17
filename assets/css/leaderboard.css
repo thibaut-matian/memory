@@ -1,0 +1,75 @@
+/* Leaderboard Section */
+
+.leaderboard-section {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.leaderboard-section h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.leaderboard-controls {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.leaderboard {
+    background: #f8f9fa;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.leaderboard-header {
+    display: grid;
+    grid-template-columns: 60px 1fr 100px 80px 80px 80px 120px;
+    gap: 15px;
+    padding: 20px;
+    background: #667eea;
+    color: white;
+    font-weight: 600;
+}
+
+.leaderboard-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 100px 80px 80px 80px 120px;
+    gap: 15px;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e1e5e9;
+    align-items: center;
+}
+
+.leaderboard-row:nth-child(even) {
+    background: white;
+}
+
+.leaderboard-row:first-child {
+    background: #ffd700;
+    font-weight: 600;
+}
+
+.leaderboard-row:nth-child(2) {
+    background: #c0c0c0;
+    font-weight: 600;
+}
+
+.leaderboard-row:nth-child(3) {
+    background: #cd7f32;
+    font-weight: 600;
+}
+
+.leaderboard-info {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.leaderboard-info ul {
+    margin-left: 20px;
+    margin-top: 10px;
+}

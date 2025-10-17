@@ -1,0 +1,244 @@
+/* ===================================
+   RESPONSIVE - Mobile & Tablet Styles
+   =================================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .container {
+        padding: 16px;
+    }
+
+    .game-board {
+        gap: 10px;
+    }
+
+    .card {
+        min-height: 100px;
+        font-size: 1.8rem;
+    }
+
+    .card-button {
+        font-size: 1.6rem;
+    }
+
+    .card-img {
+        width: 85%;
+        height: 85%;
+    }
+
+    /* Ajustement grilles pour tablet */
+    .game-board.grid-3 { max-width: 450px; }
+    .game-board.grid-4 { max-width: 600px; }
+    .game-board.grid-5 { max-width: 750px; }
+    .game-board.grid-6 { max-width: 900px; }
+}
+
+/* Mobile Large (jusqu'à 768px) */
+@media (max-width: 768px) {
+    .container {
+        padding: 12px;
+        margin: 10px auto;
+    }
+
+    .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .nav {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .game-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .stat {
+        width: 100%;
+    }
+
+    .game-board {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .card {
+        min-height: 85px;
+        font-size: 1.5rem;
+    }
+
+    .card-button {
+        font-size: 1.3rem;
+    }
+
+    .card-img {
+        width: 80%;
+        height: 80%;
+    }
+
+    /* Grilles adaptées mobile */
+    .game-board.grid-3 { 
+        max-width: 100%; 
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .game-board.grid-4 { 
+        max-width: 100%; 
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .game-board.grid-5 { 
+        max-width: 100%; 
+        grid-template-columns: repeat(4, 1fr); /* 4 colonnes au lieu de 5 */
+    }
+    
+    .game-board.grid-6 { 
+        max-width: 100%; 
+        grid-template-columns: repeat(4, 1fr); /* 4 colonnes pour 12 paires (24 cartes) */
+    }
+
+    /* Stats grid pour profil */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .achievements-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Leaderboard responsive */
+    .leaderboard-header,
+    .leaderboard-row {
+        grid-template-columns: 40px 1fr 80px;
+        font-size: 0.9rem;
+    }
+
+    .leaderboard-header div:nth-child(4),
+    .leaderboard-row div:nth-child(4) {
+        display: none; /* Cache la colonne "Temps" sur mobile */
+    }
+}
+
+/* Mobile Small (jusqu'à 480px) */
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+    }
+
+    .game-board {
+        gap: 6px;
+        padding: 6px;
+    }
+
+    .card {
+        min-height: 70px;
+        font-size: 1.2rem;
+        border-radius: 8px;
+    }
+
+    .card-button {
+        font-size: 1.1rem;
+    }
+
+    .card-img {
+        width: 75%;
+        height: 75%;
+    }
+
+    /* Grilles très petits écrans */
+    .game-board.grid-3 { 
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .game-board.grid-4 { 
+        grid-template-columns: repeat(3, 1fr); /* 3 colonnes pour 6 paires */
+    }
+    
+    .game-board.grid-5 { 
+        grid-template-columns: repeat(3, 1fr); /* 3 colonnes pour 8 paires */
+    }
+    
+    .game-board.grid-6 { 
+        grid-template-columns: repeat(3, 1fr); /* 3 colonnes pour 12 paires (24 cartes = 8 rangées) */
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+
+    .auth-card h2 {
+        font-size: 1.3rem;
+    }
+
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .leaderboard-header,
+    .leaderboard-row {
+        grid-template-columns: 30px 1fr 70px;
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+
+    .game-stats {
+        font-size: 0.9rem;
+    }
+
+    .stat strong {
+        font-size: 1.1rem;
+    }
+}
+
+/* Mobile Extra Small (jusqu'à 360px) */
+@media (max-width: 360px) {
+    .card {
+        min-height: 60px;
+        font-size: 1rem;
+    }
+
+    .card-button {
+        font-size: 1rem;
+    }
+
+    .card-img {
+        width: 70%;
+        height: 70%;
+    }
+
+    .game-board {
+        gap: 4px;
+        padding: 4px;
+    }
+
+    /* 12 paires (24 cartes) = 2 colonnes sur très petit écran */
+    .game-board.grid-6 { 
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Orientation paysage sur mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+    .container {
+        margin: 5px auto;
+    }
+
+    .header {
+        padding: 8px 0;
+    }
+
+    .game-stats {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        min-height: 60px;
+    }
+}

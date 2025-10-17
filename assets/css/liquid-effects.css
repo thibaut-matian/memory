@@ -1,0 +1,90 @@
+/* Liquid/Glassmorphism Effects and Animations */
+
+/* Glass overrides for key sections */
+.auth-card,
+.game-controls,
+.game-stats {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.25);
+}
+
+.auth-card h2 { 
+    color: #fff; 
+}
+
+.auth-form input {
+    border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+}
+
+.auth-form input::placeholder { 
+    color: rgba(255,255,255,0.85); 
+}
+
+.auth-form input:focus {
+    border-color: #fff;
+    background: rgba(255,255,255,0.3);
+}
+
+.difficulty-selector select {
+    border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+}
+
+.difficulty-selector select option { 
+    color: #333; 
+}
+
+.card {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover { 
+    transform: translateY(-6px); 
+}
+
+.card.matched { 
+    background: rgba(255,255,255,0.28); 
+    opacity: 0.9; 
+}
+
+.card-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-weight: 700;
+    border-radius: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(102,126,234,0.45);
+}
+
+.message.success {
+    background: rgba(46,204,113,0.2);
+    color: #ecf9f1;
+    border: 1px solid rgba(46,204,113,0.45);
+}
+
+.message.error {
+    background: rgba(231,76,60,0.25);
+    color: #fdecea;
+    border: 1px solid rgba(231,76,60,0.45);
+}
+
+/* Subtle floating animation for liquid feel */
+.card, .auth-card, .game-controls, .game-stats {
+    animation: floaty 6s ease-in-out infinite;
+}
+
+@keyframes floaty {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
