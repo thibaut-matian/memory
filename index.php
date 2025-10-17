@@ -342,25 +342,6 @@ if (isset($_SESSION['current_game'])) {
                     </button>
                 </form>
                 <?php endif; ?>
-                
-                <?php else: ?>
-                <div class="no-game">
-                    <h3>Aucun jeu en cours</h3>
-                    <p>Choisissez le nombre de paires et cliquez sur "Nouveau Jeu" pour commencer !</p>
-                    <form method="POST" style="text-align: center;">
-                        <select name="pairs" style="padding: 10px; margin: 10px;">
-                            <?php for ($i = 3; $i <= 12; $i++): ?>
-                                <option value="<?php echo $i; ?>" <?php echo $i == 6 ? 'selected' : ''; ?>>
-                                    <?php echo $i; ?> paires
-                                </option>
-                            <?php endfor; ?>
-                        </select>
-                        <button type="submit" name="action" value="new_game" class="btn btn-primary">🎮 Démarrer une partie</button>
-                    </form>
-                </div>
-                <?php endif; ?>
-            </div>
-            <?php endif; ?>
         </main>
     </div>
 </body>
