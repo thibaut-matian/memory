@@ -1,10 +1,13 @@
 /* Profile Section - Stats, History, Achievements */
 
 .profile-section {
-    background: white;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+    border: 1px solid rgba(255,255,255,0.1);
     padding: 30px;
     border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
 }
 
 .profile-header {
@@ -15,7 +18,8 @@
 }
 
 .profile-header h2 {
-    color: #333;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .stats-grid {
@@ -26,23 +30,34 @@
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.25), rgba(118, 75, 162, 0.25));
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: rgb(0, 0, 0);
     padding: 25px;
     border-radius: 15px;
     text-align: center;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.45);
 }
 
 .stat-card h3 {
     margin-bottom: 15px;
     font-size: 1rem;
-    opacity: 0.9;
+    opacity: 0.95;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
 .stat-value {
     font-size: 2rem;
     font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 .profile-history {
@@ -51,7 +66,8 @@
 
 .profile-history h3 {
     margin-bottom: 20px;
-    color: #333;
+    color: #000000;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .history-controls {
@@ -59,9 +75,13 @@
 }
 
 .history-table {
-    background: #f8f9fa;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border-radius: 15px;
     overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
 .history-header {
@@ -69,9 +89,12 @@
     grid-template-columns: 80px 100px 80px 80px 120px;
     gap: 15px;
     padding: 20px;
-    background: #667eea;
-    color: white;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.35), rgba(118, 75, 162, 0.35));
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: rgb(0, 0, 0);
     font-weight: 600;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
 .history-row {
@@ -79,12 +102,18 @@
     grid-template-columns: 80px 100px 80px 80px 120px;
     gap: 15px;
     padding: 15px 20px;
-    border-bottom: 1px solid #e1e5e9;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
     align-items: center;
+    color: #000000;
+    transition: background 0.2s ease;
+}
+
+.history-row:hover {
+    background: rgba(255,255,255,0.08);
 }
 
 .history-row:nth-child(even) {
-    background: white;
+    background: rgba(255,255,255,0.03);
 }
 
 .achievements-grid {
@@ -97,30 +126,40 @@
     padding: 20px;
     border-radius: 10px;
     text-align: center;
-    border: 2px solid #e1e5e9;
+    border: 2px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     transition: all 0.3s ease;
 }
 
 .achievement.unlocked {
-    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-    color: white;
-    border-color: #27ae60;
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.3), rgba(39, 174, 96, 0.3));
+    color: rgb(0, 0, 0);
+    border-color: rgba(46, 204, 113, 0.5);
+    box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+}
+
+.achievement.unlocked:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(46, 204, 113, 0.45);
 }
 
 .achievement.locked {
-    background: #f8f9fa;
-    color: #999;
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.4);
     opacity: 0.6;
 }
 
 .achievement-icon {
     font-size: 2rem;
     margin-bottom: 10px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
 }
 
 .achievement-title {
     font-weight: 600;
     margin-bottom: 5px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
 .achievement-desc {

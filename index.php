@@ -207,7 +207,7 @@ if (isset($_SESSION['current_game'])) {
 <body class="memory-page">
     <div class="container">
         <header class="header">
-            <h1>🧠 Memory Game</h1>
+            <h1> Memory Game</h1>
             <nav class="nav">
                 <a href="index.php" class="nav-link active">Jouer</a>
                 <a href="leaderboard.php" class="nav-link">Classement</a>

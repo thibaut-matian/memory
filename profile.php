@@ -142,10 +142,10 @@ $achievements = [
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="memory-page">
+<body class="profile-page">
     <div class="container">
         <header class="header">
-            <h1>🧠 Memory Game</h1>
+            <h1> Memory Game</h1>
             <nav class="nav">
                 <a href="index.php" class="nav-link">Jouer</a>
                 <a href="leaderboard.php" class="nav-link">Classement</a>
