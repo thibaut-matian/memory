@@ -204,7 +204,7 @@ if (isset($_SESSION['current_game'])) {
         <meta http-equiv="refresh" content="1;url=index.php?do=reset<?= $lastAnchor ?>">
     <?php endif; ?>
 </head>
-<body>
+<body class="memory-page">
     <div class="container">
         <header class="header">
             <h1>🧠 Memory Game</h1>

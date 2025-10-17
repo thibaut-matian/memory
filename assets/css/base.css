@@ -78,3 +78,21 @@ body {
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+
+/* Image de fond uniquement sur la page Memory */
+body.memory-page {
+  background-image:
+    linear-gradient(135deg, rgba(106,17,203,0.55), rgba(37,117,252,0.55)),
+    url('../img/onepiece/Chapter_1111.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* effet parallax léger */
+}
+
+/* Option: si l’image est très contrastée, augmentez l’overlay */
+body.memory-page.bg-strong {
+  background-image:
+    /* linear-gradient(135deg, rgba(106,17,203,0.72), rgba(37,117,252,0.72)), */
+    url('../img/onepiece/Chapter_1111.webp');
+}
