@@ -1,8 +1,5 @@
 <?php
-/**
- * Memory Game - Page principale
- * Gestion de l'authentification et du jeu de mémoire
- */
+
 
 session_start();
 
@@ -287,7 +284,7 @@ if (isset($_SESSION['current_game'])) {
         
         <!-- En-tête -->
         <header class="header">
-            <h1>🎮 Memory Game</h1>
+            <h1> Memory Game</h1>
             <nav class="nav">
                 <a href="index.php" class="nav-link active">Jouer</a>
                 <a href="leaderboard.php" class="nav-link">Classement</a>
@@ -375,7 +372,40 @@ if (isset($_SESSION['current_game'])) {
                     $timeFormatted = sprintf('%02d:%02d', floor($gameTime / 60), $gameTime % 60);
                 ?>
                 
-                <!-- Statistiques du jeu -->
+                
+                <div class="game-board grid-<?= ceil(sqrt(count($currentGame->getCards()))) ?>">
+                    <?php foreach ($currentGame->getCards() as $card): ?>
+                        <div id="card-<?= $card['id'] ?>" class="card-container <?= $card['isMatched'] ? 'matched' : '' ?>">
+                            
+                            <?php if ($card['isMatched']): ?>
+                                <!-- Carte trouvée -->
+                                <div class="card face front matched" style="background-color: <?= htmlspecialchars($card['color']) ?>;">
+                                    <img src="<?= htmlspecialchars($card['image']) ?>" alt="Carte trouvée" class="card-img">
+                                </div>
+                                
+                            <?php elseif ($card['isFlipped']): ?>
+                                <!-- Carte retournée temporairement -->
+                                <div class="card face front flipped" style="background-color: <?= htmlspecialchars($card['color']) ?>;">
+                                    <img src="<?= htmlspecialchars($card['image']) ?>" alt="Carte retournée" class="card-img">
+                                </div>
+                                
+                            <?php else: ?>
+                                <!-- Carte cachée -->
+                                <form method="POST" class="card-form">
+                                    <button type="submit" name="action" value="flip_card" 
+                                            class="card face back" 
+                                            aria-label="Retourner la carte <?= $card['id'] ?>">
+                                        ?
+                                    </button>
+                                    <input type="hidden" name="card_id" value="<?= $card['id'] ?>">
+                                </form>
+                            <?php endif; ?>
+                            
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- ✅ 2. STATISTIQUES EN DESSOUS (mais affichées en haut avec CSS) -->
                 <div class="game-stats">
                     <div class="stat">
                         <span class="stat-label">Coups :</span>
@@ -418,39 +448,6 @@ if (isset($_SESSION['current_game'])) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Plateau de jeu -->
-                <div class="game-board grid-<?= ceil(sqrt(count($currentGame->getCards()))) ?>">
-                    <?php foreach ($currentGame->getCards() as $card): ?>
-                        <div id="card-<?= $card['id'] ?>" class="card-container <?= $card['isMatched'] ? 'matched' : '' ?>">
-                            
-                            <?php if ($card['isMatched']): ?>
-                                <!-- Carte trouvée -->
-                                <div class="card face front matched" style="background-color: <?= htmlspecialchars($card['color']) ?>;">
-                                    <img src="<?= htmlspecialchars($card['image']) ?>" alt="Carte trouvée" class="card-img">
-                                </div>
-                                
-                            <?php elseif ($card['isFlipped']): ?>
-                                <!-- Carte retournée temporairement -->
-                                <div class="card face front flipped" style="background-color: <?= htmlspecialchars($card['color']) ?>;">
-                                    <img src="<?= htmlspecialchars($card['image']) ?>" alt="Carte retournée" class="card-img">
-                                </div>
-                                
-                            <?php else: ?>
-                                <!-- Carte cachée -->
-                                <form method="POST" class="card-form">
-                                    <button type="submit" name="action" value="flip_card" 
-                                            class="card face back" 
-                                            aria-label="Retourner la carte <?= $card['id'] ?>">
-                                        ?
-                                    </button>
-                                    <input type="hidden" name="card_id" value="<?= $card['id'] ?>">
-                                </form>
-                            <?php endif; ?>
-                            
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                
                 <!-- Bouton de reset manuel (si 2 cartes retournées) -->
                 <?php if ($stats['flippedCards'] == 2 && !$stats['isCompleted']): ?>
                 <form method="POST" style="text-align: center; margin: 20px 0;">
@@ -459,7 +456,7 @@ if (isset($_SESSION['current_game'])) {
                     </button>
                 </form>
                 <?php endif; ?>
-                
+
                 <?php else: ?>
                 
                 <!-- Aucun jeu en cours -->

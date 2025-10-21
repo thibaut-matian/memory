@@ -4,7 +4,7 @@
 .auth-card,
 .game-controls,
 .game-stats {
-    background: rgba(255,255,255,0.15);
+    background: rgba(26, 25, 25, 0.555);
     backdrop-filter: blur(10px) saturate(140%);
     -webkit-backdrop-filter: blur(10px) saturate(140%);
     border: 1px solid rgba(255,255,255,0.25);
@@ -40,9 +40,9 @@
 }
 
 .card {
-    background: rgba(255,255,255,0.18);
-    border: 1px solid rgba(255,255,255,0.25);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+    background: rgba(2, 2, 2, 0.466);
+    border: 1px solid rgba(2, 2, 2, 0.466);
+    box-shadow: 0 12px 28px rgba(2, 2, 2, 0.466);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
