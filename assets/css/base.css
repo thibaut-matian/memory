@@ -1,4 +1,4 @@
-/* Base Styles - Reset and Global */
+
 
 * {
     margin: 0;
@@ -87,10 +87,9 @@ body.memory-page {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed; /* effet parallax léger */
+  background-attachment: fixed; 
 }
 
-/* Option: si l’image est très contrastée, augmentez l’overlay */
 body.memory-page.bg-strong {
   background-image:
     /* linear-gradient(135deg, rgba(106,17,203,0.72), rgba(37,117,252,0.72)), */
