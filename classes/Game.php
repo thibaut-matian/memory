@@ -17,7 +17,6 @@ class Game {
     }
     
     private function generateCards() {
-        // Liste d'images One Piece (fichiers fournis dans assets/img/onepiece/)
         $images = [
             'Monkey_D_Luffy.png',
             'Kaidou_Anime_Infobox.webp',
@@ -34,10 +33,10 @@ class Game {
         ];
         $colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#f1c40f', '#95a5a6', '#d35400', '#27ae60'];
         
-        // chemin relatif vers le dossier images (ajustez si besoin)
+        // chemin relatif vers le dossier images 
         $imgBase = 'assets/img/onepiece/';
 
-        // Prendre seulement le nombre d'images nécessaires
+        // Prend seulement le nombre d'images nécessaires
         $selected_images = array_slice($images, 0, $this->pairs_count);
         $selected_colors = array_slice($colors, 0, $this->pairs_count);
         
@@ -65,7 +64,6 @@ class Game {
         foreach ($this->cards as $card) {
             $cards_array[] = [
                 'id' => $card->getId(),
-                // 'symbol' contient maintenant le chemin de l'image ; on expose aussi 'image'
                 'symbol' => $card->getSymbol(),
                 'image' => $card->getSymbol(),
                 'color' => $card->getColor(),
@@ -78,18 +76,18 @@ class Game {
     
     public function flipCard($card_id) {
         if (count($this->flipped_cards) >= 2) {
-            return false; // Déjà 2 cartes retournées
+            return false; //  2 cartes retournées
         }
         
         if (in_array($card_id, $this->flipped_cards) || 
             in_array($card_id, $this->found_pairs)) {
-            return false; // Carte déjà retournée ou trouvée
+            return false; // Carte deja retournée ou trouvée
         }
         
         $this->cards[$card_id]->flip();
         $this->flipped_cards[] = $card_id;
         
-        // Si 2 cartes retournées, vérifier si c'est une paire
+        // Si 2 cartes retourn, vérifie si paire
         if (count($this->flipped_cards) == 2) {
             $this->moves++;
             
@@ -113,7 +111,6 @@ class Game {
     }
     
     public function continueGame() {
-        // Remettre les cartes face cachée si ce n'est pas une paire
         if (count($this->flipped_cards) == 2) {
             foreach ($this->flipped_cards as $card_id) {
                 if (!in_array($card_id, $this->found_pairs)) {
