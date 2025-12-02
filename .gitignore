@@ -1,0 +1,15 @@
+# Logs (contiennent des infos sensibles)
+logs/*.log
+logs/error.log
+
+# Mais garder le dossier
+!logs/.gitkeep
+
+# Autres fichiers sensibles
+.env
+sessions/*
+!sessions/.gitkeep
+
+# Fichiers système
+.DS_Store
+Thumbs.db

@@ -4,7 +4,6 @@
  * Configuration de la base de données MySQL
  */
 class DatabaseConfig {
-    // Configuration MySQL - À modifier selon votre configuration
     const DB_HOST = 'localhost';
     const DB_NAME = 'memory_game';
     const DB_USER = 'root';
@@ -12,9 +11,7 @@ class DatabaseConfig {
     const DB_PORT = 3306;
     const DB_CHARSET = 'utf8mb4';
     
-    /**
-     * Obtenir la chaîne de connexion DSN
-     */
+ 
     public static function getDSN() {
         return sprintf(
             'mysql:host=%s;port=%d;dbname=%s;charset=%s',
@@ -25,9 +22,7 @@ class DatabaseConfig {
         );
     }
     
-    /**
-     * Obtenir les options PDO recommandées
-     */
+
     public static function getPDOOptions() {
         return [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -37,9 +32,7 @@ class DatabaseConfig {
         ];
     }
     
-    /**
-     * Tester la connexion à la base de données
-     */
+  
     public static function testConnection() {
         try {
             $pdo = new PDO(

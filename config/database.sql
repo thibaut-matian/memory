@@ -37,3 +37,5 @@ INSERT INTO scores (player_id, pairs, moves, time, score) VALUES
 (2, 10, 20, 240, 7800),
 (3, 12, 24, 300, 9500),
 (3, 6, 12, 90, 6800);
+
+ALTER TABLE players ADD COLUMN password VARCHAR(255) AFTER username;

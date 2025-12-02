@@ -1,11 +1,43 @@
 <?php
 
+// ============================================
+// CONFIGURATION SÉCURITÉ
+// ============================================
+
+// Headers de sécurité
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
+// Configuration session sécurisée
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', isset($_SERVER['HTTPS']));
+ini_set('session.cookie_samesite', 'Strict');
+ini_set('session.use_strict_mode', 1);
 
 session_start();
 
-// Configuration des erreurs (à désactiver en production)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Configuration des erreurs selon environnement
+$isLocalhost = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', '::1']);
+
+if ($isLocalhost) {
+    // Développement
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+} else {
+    // Production
+    error_reporting(E_ALL);
+    ini_set('display_errors', 0);
+    ini_set('log_errors', 1);
+    ini_set('error_log', __DIR__ . '/logs/error.log');
+    
+    // Gestionnaire d'erreurs personnalisé
+    set_error_handler(function($errno, $errstr, $errfile, $errline) {
+        error_log("Erreur [$errno]: $errstr dans $errfile:$errline");
+        return true;
+    });
+}
 
 // Inclusion des dépendances
 require_once 'config/DatabaseConfig.php';
@@ -14,6 +46,7 @@ require_once 'classes/Database.php';
 require_once 'classes/Player.php';
 require_once 'classes/Game.php';
 require_once 'classes/Card.php';
+require_once 'classes/Security.php';
 
 // Initialisation
 try {
@@ -22,8 +55,13 @@ try {
     $message = '';
     $error = '';
 } catch (Exception $e) {
-    die("Erreur d'initialisation: " . htmlspecialchars($e->getMessage()) . 
-        "<br><a href='install.php'>Installer la base de données</a>");
+    if ($isLocalhost) {
+        die("Erreur d'initialisation: " . htmlspecialchars($e->getMessage()) . 
+            "<br><a href='install.php'>Installer la base de données</a>");
+    } else {
+        error_log("Erreur d'initialisation: " . $e->getMessage());
+        die("Service temporairement indisponible. Veuillez réessayer plus tard.");
+    }
 }
 
 // Nettoyage des sessions corrompues
@@ -39,167 +77,241 @@ if (isset($_SESSION['current_game'])) {
 }
 
 // ============================================================================
-// TRAITEMENT DES ACTIONS POST
+// TRAITEMENT DES ACTIONS POST SÉCURISÉES
 // ============================================================================
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     
-    switch ($_POST['action']) {
-        
-        // ----------------------------------------------------------------
-        // AUTHENTIFICATION - Connexion
-        // ----------------------------------------------------------------
-        case 'login':
-            $username = trim($_POST['username'] ?? '');
+    // ✅ VALIDATION CSRF (sauf pour login/register)
+    $publicActions = ['login', 'register'];
+    if (!in_array($_POST['action'], $publicActions)) {
+        if (!Security::validateCSRFToken($_POST['csrf_token'] ?? '')) {
+            $error = "Token de sécurité invalide. Veuillez recharger la page.";
+        }
+    }
+    
+    if (empty($error)) {
+        switch ($_POST['action']) {
             
-            if (empty($username)) {
-                $error = "Nom d'utilisateur requis.";
-                break;
-            }
-            
-            try {
-                if ($player->login($username)) {
-                    $_SESSION['player_id'] = $player->getId();
-                    $_SESSION['player_username'] = $player->getUsername();
-                    session_write_close();
-                    header('Location: index.php');
-                    exit;
+            // ----------------------------------------------------------------
+            // AUTHENTIFICATION - Connexion SÉCURISÉE
+            // ----------------------------------------------------------------
+            case 'login':
+                if (!Security::checkRateLimit('login', 5, 900)) {
+                    $error = "Trop de tentatives de connexion. Attendez 15 minutes.";
+                    break;
                 }
-                $error = "Utilisateur non trouvé. Essayez de vous inscrire.";
-            } catch (Exception $e) {
-                $error = "Erreur de connexion: " . htmlspecialchars($e->getMessage());
-            }
-            break;
-            
-        // ----------------------------------------------------------------
-        // AUTHENTIFICATION - Inscription
-        // ----------------------------------------------------------------
-        case 'register':
-            $username = trim($_POST['username'] ?? '');
-            $email = trim($_POST['email'] ?? '');
-            
-            if (empty($username)) {
-                $error = "Nom d'utilisateur requis.";
-                break;
-            }
-            
-            try {
-                if ($player->register($username, $email ?: null)) {
-                    $_SESSION['player_id'] = $player->getId();
-                    $_SESSION['player_username'] = $player->getUsername();
-                    session_write_close();
-                    header('Location: index.php');
-                    exit;
+                
+                $username = Security::sanitize($_POST['username'] ?? '', 'username');
+                $password = $_POST['password'] ?? '';
+                
+                if (empty($username) || empty($password)) {
+                    $error = "Nom d'utilisateur et mot de passe requis.";
+                    Security::recordAttempt('login');
+                    break;
                 }
-                $error = "Nom d'utilisateur déjà utilisé.";
-            } catch (Exception $e) {
-                $error = "Erreur d'inscription: " . htmlspecialchars($e->getMessage());
-            }
-            break;
-            
-        // ----------------------------------------------------------------
-        // AUTHENTIFICATION - Déconnexion
-        // ----------------------------------------------------------------
-        case 'logout':
-            session_destroy();
-            header('Location: index.php');
-            exit;
-            
-        // ----------------------------------------------------------------
-        // JEU - Nouveau jeu
-        // ----------------------------------------------------------------
-        case 'new_game':
-            if (!isset($_SESSION['player_id'])) {
-                $error = "Veuillez vous connecter pour jouer.";
+                
+                if (!Security::validateUsername($username)) {
+                    $error = "Format de nom d'utilisateur invalide.";
+                    Security::recordAttempt('login');
+                    break;
+                }
+                
+                try {
+                    if ($player->login($username, $password)) {
+                        // Régénération session (sécurité)
+                        session_regenerate_id(true);
+                        $_SESSION['player_id'] = $player->getId();
+                        $_SESSION['player_username'] = $player->getUsername();
+                        $_SESSION['login_time'] = time();
+                        Security::generateCSRFToken(); // Nouveau token
+                        
+                        session_write_close();
+                        header('Location: index.php');
+                        exit;
+                    }
+                    $error = "Nom d'utilisateur ou mot de passe incorrect.";
+                    Security::recordAttempt('login');
+                } catch (Exception $e) {
+                    $error = "Erreur de connexion.";
+                    Security::recordAttempt('login');
+                    if ($isLocalhost) {
+                        $error .= " " . htmlspecialchars($e->getMessage());
+                    }
+                }
                 break;
-            }
-            
-            try {
-                $pairs = Config::validatePairs($_POST['pairs'] ?? 6);
-                $game = new Game($pairs, $_SESSION['player_id']);
-                $_SESSION['current_game'] = serialize($game);
-                $_SESSION['game_start_time'] = time();
-                session_write_close();
+                
+            // ----------------------------------------------------------------
+            // AUTHENTIFICATION - Inscription SÉCURISÉE
+            // ----------------------------------------------------------------
+            case 'register':
+                if (!Security::checkRateLimit('register', 3, 3600)) {
+                    $error = "Trop d'inscriptions tentées. Attendez 1 heure.";
+                    break;
+                }
+                
+                $username = Security::sanitize($_POST['username'] ?? '', 'username');
+                $password = $_POST['password'] ?? '';
+                $email = Security::sanitize($_POST['email'] ?? '', 'email');
+                
+                if (empty($username) || empty($password)) {
+                    $error = "Nom d'utilisateur et mot de passe requis.";
+                    Security::recordAttempt('register');
+                    break;
+                }
+                
+                if (!Security::validateUsername($username)) {
+                    $error = "Le nom d'utilisateur doit contenir 3-20 caractères alphanumériques uniquement.";
+                    break;
+                }
+                
+                if (!Security::validatePassword($password)) {
+                    $error = "Le mot de passe doit contenir au moins 8 caractères, 1 majuscule et 1 chiffre.";
+                    break;
+                }
+                
+                if (!empty($email) && !Security::validateEmail($email)) {
+                    $error = "Format d'email invalide.";
+                    break;
+                }
+                
+                try {
+                    if ($player->register($username, $password, $email ?: null)) {
+                        session_regenerate_id(true);
+                        $_SESSION['player_id'] = $player->getId();
+                        $_SESSION['player_username'] = $player->getUsername();
+                        $_SESSION['login_time'] = time();
+                        Security::generateCSRFToken();
+                        
+                        session_write_close();
+                        header('Location: index.php');
+                        exit;
+                    }
+                    $error = "Nom d'utilisateur déjà utilisé.";
+                    Security::recordAttempt('register');
+                } catch (Exception $e) {
+                    $error = "Erreur d'inscription.";
+                    Security::recordAttempt('register');
+                    if ($isLocalhost) {
+                        $error .= " " . htmlspecialchars($e->getMessage());
+                    }
+                }
+                break;
+                
+            // ----------------------------------------------------------------
+            // AUTHENTIFICATION - Déconnexion
+            // ----------------------------------------------------------------
+            case 'logout':
+                session_destroy();
                 header('Location: index.php');
                 exit;
-            } catch (Exception $e) {
-                $error = "Erreur lors de la création du jeu: " . htmlspecialchars($e->getMessage());
-            }
-            break;
-            
-        // ----------------------------------------------------------------
-        // JEU - Retourner une carte
-        // ----------------------------------------------------------------
-        case 'flip_card':
-            if (!isset($_SESSION['current_game'], $_SESSION['player_id'])) {
-                $error = "Session expirée. Veuillez vous reconnecter.";
-                break;
-            }
-            
-            try {
-                $game = unserialize($_SESSION['current_game']);
-                $cardId = (int)($_POST['card_id'] ?? -1);
-
-                if (!$game || !method_exists($game, 'flipCard')) {
-                    throw new Exception("Jeu invalide");
-                }
-
-                $result = $game->flipCard($cardId);
                 
-                if ($result) {
-                    $_SESSION['current_game'] = serialize($game);
-                    $stats = $game->getStats();
-
-                    // Jeu terminé
-                    if ($stats['isCompleted']) {
-                        $gameTime = time() - $_SESSION['game_start_time'];
-                        $playerForScore = new Player($db);
-                        $playerForScore->login($_SESSION['player_username']);
-                        $playerForScore->saveGameScore(
-                            $stats['pairs'], 
-                            $stats['moves'], 
-                            $gameTime, 
-                            $stats['score']
-                        );
-                        $_SESSION['game_message'] = "🎉 Félicitations ! Jeu terminé en {$stats['moves']} coups !";
-                    } 
-                    // Pas de paire trouvée - déclencher auto-reset
-                    elseif ($result === 'no_pair') {
-                        $_SESSION['pending_reset'] = true;
-                    }
-
-                    // Mémoriser la carte pour l'ancrage
-                    $_SESSION['last_card'] = $cardId;
-                    session_write_close();
-                    header('Location: index.php#card-' . $cardId);
-                    exit;
+            // ----------------------------------------------------------------
+            // JEU - Nouveau jeu (avec CSRF)
+            // ----------------------------------------------------------------
+            case 'new_game':
+                if (!isset($_SESSION['player_id'])) {
+                    $error = "Veuillez vous connecter pour jouer.";
+                    break;
                 }
-            } catch (Exception $e) {
-                $error = "Erreur de jeu: " . htmlspecialchars($e->getMessage());
-            }
-            break;
-            
-        // ----------------------------------------------------------------
-        // JEU - Réinitialiser les cartes retournées
-        // ----------------------------------------------------------------
-        case 'reset_flipped':
-            if (!isset($_SESSION['current_game'])) {
-                break;
-            }
-            
-            try {
-                $game = unserialize($_SESSION['current_game']);
-                if ($game && method_exists($game, 'resetFlippedCards')) {
-                    $game->resetFlippedCards();
+                
+                try {
+                    $pairs = Security::sanitize($_POST['pairs'] ?? 6, 'int');
+                    $pairs = Config::validatePairs($pairs);
+                    
+                    $game = new Game($pairs, $_SESSION['player_id']);
                     $_SESSION['current_game'] = serialize($game);
+                    $_SESSION['game_start_time'] = time();
                     session_write_close();
                     header('Location: index.php');
                     exit;
+                } catch (Exception $e) {
+                    $error = "Erreur lors de la création du jeu.";
+                    if ($isLocalhost) {
+                        $error .= " " . htmlspecialchars($e->getMessage());
+                    }
                 }
-            } catch (Exception $e) {
-                $error = "Erreur lors du reset: " . htmlspecialchars($e->getMessage());
-            }
-            break;
+                break;
+                
+            // ----------------------------------------------------------------
+            // JEU - Retourner une carte (avec CSRF)
+            // ----------------------------------------------------------------
+            case 'flip_card':
+                if (!isset($_SESSION['current_game'], $_SESSION['player_id'])) {
+                    $error = "Session expirée. Veuillez vous reconnecter.";
+                    break;
+                }
+                
+                try {
+                    $game = unserialize($_SESSION['current_game']);
+                    $cardId = Security::sanitize($_POST['card_id'] ?? -1, 'int');
+
+                    if (!$game || !method_exists($game, 'flipCard')) {
+                        throw new Exception("Jeu invalide");
+                    }
+
+                    $result = $game->flipCard($cardId);
+                    
+                    if ($result) {
+                        $_SESSION['current_game'] = serialize($game);
+                        $stats = $game->getStats();
+
+                        // Jeu terminé
+                        if ($stats['isCompleted']) {
+                            $gameTime = time() - $_SESSION['game_start_time'];
+                            $playerForScore = new Player($db);
+                            $playerForScore->login($_SESSION['player_username'], ''); // Login sans password pour score
+                            $playerForScore->saveGameScore(
+                                $stats['pairs'], 
+                                $stats['moves'], 
+                                $gameTime, 
+                                $stats['score']
+                            );
+                            $_SESSION['game_message'] = "🎉 Félicitations ! Jeu terminé en {$stats['moves']} coups !";
+                        } 
+                        // Pas de paire trouvée
+                        elseif ($result === 'no_pair') {
+                            $_SESSION['pending_reset'] = true;
+                        }
+
+                        $_SESSION['last_card'] = $cardId;
+                        session_write_close();
+                        header('Location: index.php#card-' . $cardId);
+                        exit;
+                    }
+                } catch (Exception $e) {
+                    $error = "Erreur de jeu.";
+                    if ($isLocalhost) {
+                        $error .= " " . htmlspecialchars($e->getMessage());
+                    }
+                }
+                break;
+                
+            // ----------------------------------------------------------------
+            // JEU - Reset cartes (avec CSRF)
+            // ----------------------------------------------------------------
+            case 'reset_flipped':
+                if (!isset($_SESSION['current_game'])) {
+                    break;
+                }
+                
+                try {
+                    $game = unserialize($_SESSION['current_game']);
+                    if ($game && method_exists($game, 'resetFlippedCards')) {
+                        $game->resetFlippedCards();
+                        $_SESSION['current_game'] = serialize($game);
+                        session_write_close();
+                        header('Location: index.php');
+                        exit;
+                    }
+                } catch (Exception $e) {
+                    $error = "Erreur lors du reset.";
+                    if ($isLocalhost) {
+                        $error .= " " . htmlspecialchars($e->getMessage());
+                    }
+                }
+                break;
+        }
     }
 }
 
@@ -305,15 +417,13 @@ if (isset($_SESSION['current_game'])) {
 
             <?php if (!$currentPlayer): ?>
             
-            <!-- ============================================ -->
-            <!-- NON CONNECTÉ - Formulaire d'authentification -->
-            <!-- ============================================ -->
-            
+            <!-- Formulaire d'authentification SÉCURISÉ -->
             <div class="auth-section">
                 <div class="auth-card">
                     <h2>Se connecter ou créer un compte</h2>
                     <form method="POST" class="auth-form">
-                        <input type="text" name="username" placeholder="Nom d'utilisateur" required>
+                        <input type="text" name="username" placeholder="Nom d'utilisateur (3-20 caractères)" required maxlength="20">
+                        <input type="password" name="password" placeholder="Mot de passe (min 8 caractères, 1 majuscule, 1 chiffre)" required minlength="8">
                         <input type="email" name="email" placeholder="Email (optionnel)">
                         <div class="auth-buttons">
                             <button type="submit" name="action" value="login" class="btn btn-primary">
@@ -339,6 +449,7 @@ if (isset($_SESSION['current_game'])) {
                 <div class="game-controls">
                     <div class="difficulty-selector">
                         <form method="POST" style="display: inline;">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCSRFToken()) ?>">
                             <label for="pairs">Nombre de paires :</label>
                             <select name="pairs" id="pairs">
                                 <?php for ($i = 3; $i <= 12; $i++): 
@@ -359,6 +470,7 @@ if (isset($_SESSION['current_game'])) {
                     <div class="player-info">
                         <span>👤 <?= htmlspecialchars($currentPlayer->username) ?></span>
                         <form method="POST" style="display: inline;">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCSRFToken()) ?>">
                             <button type="submit" name="action" value="logout" class="btn btn-small">
                                 Déconnexion
                             </button>
@@ -391,7 +503,9 @@ if (isset($_SESSION['current_game'])) {
                                 
                             <?php else: ?>
                                 <!-- Carte cachée -->
+                                <!-- ✅ Formulaire avec CSRF -->
                                 <form method="POST" class="card-form">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCSRFToken()) ?>">
                                     <button type="submit" name="action" value="flip_card" 
                                             class="card face back" 
                                             aria-label="Retourner la carte <?= $card['id'] ?>">
@@ -439,6 +553,7 @@ if (isset($_SESSION['current_game'])) {
                             </div>
                         </div>
                         <form method="POST" style="margin-top: 20px;">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCSRFToken()) ?>">
                             <button type="submit" name="action" value="new_game" class="btn btn-primary">
                                 Rejouer
                             </button>
@@ -451,6 +566,7 @@ if (isset($_SESSION['current_game'])) {
                 <!-- Bouton de reset manuel (si 2 cartes retournées) -->
                 <?php if ($stats['flippedCards'] == 2 && !$stats['isCompleted']): ?>
                 <form method="POST" style="text-align: center; margin: 20px 0;">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCSRFToken()) ?>">
                     <button type="submit" name="action" value="reset_flipped" class="btn btn-secondary">
                         Continuer (retourner les cartes)
                     </button>
@@ -464,6 +580,7 @@ if (isset($_SESSION['current_game'])) {
                     <h3>Aucun jeu en cours</h3>
                     <p>Choisissez le nombre de paires et cliquez sur "Nouveau Jeu" pour commencer !</p>
                     <form method="POST" style="text-align: center; margin-top: 20px;">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Security::generateCSRFToken()) ?>">
                         <select name="pairs" style="padding: 10px; margin: 10px; border-radius: 8px;">
                             <?php for ($i = 3; $i <= 12; $i++): ?>
                                 <option value="<?= $i ?>" <?= $i == 6 ? 'selected' : '' ?>>

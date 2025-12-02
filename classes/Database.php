@@ -10,7 +10,7 @@ class Database {
     }
     
     private function connect() {
-        try {
+        try { 
             $this->pdo = new PDO(
                 DatabaseConfig::getDSN(),
                 DatabaseConfig::DB_USER,
