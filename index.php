@@ -39,8 +39,11 @@ if ($isLocalhost) {
     });
 }
 
-// Inclusion des dépendances
-require_once 'config/DatabaseConfig.php';
+if (file_exists(__DIR__ . '/../DatabaseConfig.php')) {
+    require_once __DIR__ . '/../DatabaseConfig.php';
+} else {
+    require_once __DIR__ . '/config/DatabaseConfig.php';
+}
 require_once 'config/Config.php';
 require_once 'classes/Database.php';
 require_once 'classes/Player.php';
