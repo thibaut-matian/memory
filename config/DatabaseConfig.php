@@ -5,9 +5,9 @@
  */
 class DatabaseConfig {
     const DB_HOST = 'localhost';
-    const DB_NAME = 'memory_game';
-    const DB_USER = 'root';
-    const DB_PASS = '';  // Mot de passe par défaut WAMP (vide)
+    const DB_NAME = 'memory';
+    const DB_USER = 'memory_thibaut';
+    const DB_PASS = 'ProjetMemory_2025_Secure!';
     const DB_PORT = 3306;
     const DB_CHARSET = 'utf8mb4';
     
