@@ -44,7 +44,7 @@ if (file_exists(__DIR__ . '/../DatabaseConfig.php')) {
 } else {
     require_once __DIR__ . '/config/DatabaseConfig.php';
 }
-require_once 'config/Config.php';
+require_once 'config/Config.php'; 
 require_once 'classes/Database.php';
 require_once 'classes/Player.php';
 require_once 'classes/Game.php';
